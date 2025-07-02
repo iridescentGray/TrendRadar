@@ -1,0 +1,10 @@
+[project]
+name = "trendradar"
+version = "0.1.0"
+description = "🔍 多平台热门新闻聚合工具，自动推送你关注的新闻 - 自媒体微信公众号等新闻类文章辅助工具，支持今日头条、百度热搜、微博、抖音、知乎、B 站、财联社等11个中文热门平台，分析关键词频率，生成报告并支持多渠道手机推送等。持续追踪热点变化。😊欢迎通过 star ⭐支持开发者，😎为伟大的开源事业添砖加瓦，已支持企业微信，飞书，钉钉，telegram的推送渠道"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pytz>=2025.2",
+    "requests>=2.32.4",
+]
