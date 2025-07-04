@@ -3,6 +3,7 @@
 .dockerignore
 .eggs
 .github
+.github/
 .pylintrc
 .travis.yml
 .coveragerc
@@ -10,12 +11,15 @@
 .DS_Store
 .mypy_cache
 .ipynb_checkpoints
+LICENSE
+
 
 Dockerfile
 Dockerfile.armhf
 docker-compose.yml
 requirements-dev.txt
 README.md
+readme.md
 
 *.sqlite
 *.db
@@ -29,3 +33,8 @@ tests/
 .pytest_cache/
 .venv/
 __pycache__/
+output/
+uv.lock
+_image/
+version
+index.html

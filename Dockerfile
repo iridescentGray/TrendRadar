@@ -9,9 +9,11 @@ WORKDIR /trendradar
 
 FROM base as runtime-image
 
-COPY requirements.txt  /trendradar/
-RUN  pip install --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt \
-    && apt-get update 
+COPY requirements.txt /trendradar/
+
+RUN apt-get update  \
+    &&  pip install --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt 
+
 
 COPY . /trendradar/

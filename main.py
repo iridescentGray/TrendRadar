@@ -8,11 +8,15 @@ import webbrowser
 from typing import Dict, List, Tuple, Optional, Union
 from pathlib import Path
 import os
+from schedule import Scheduler
 
 import requests
 import pytz
 
+from yaml_config import ConfigManager
+
 CONFIG = {
+    "GITHUB_ACTIONS": "False",
     "VERSION": "1.3.0",
     "VERSION_CHECK_URL": "https://raw.githubusercontent.com/sansan0/TrendRadar/refs/heads/master/version",
     "SHOW_VERSION_UPDATE": True,  # 控制显示版本更新提示，改成 False 将不接受新版本提示
@@ -20,7 +24,7 @@ CONFIG = {
     "REQUEST_INTERVAL": 1000,  # 请求间隔(毫秒)
     "REPORT_TYPE": "daily",  # 报告类型: "current"|"daily"|"both"
     "RANK_THRESHOLD": 5,  # 排名高亮阈值
-    "USE_PROXY": True,  # 是否启用代理
+    "USE_PROXY": False,  # 是否启用代理
     "DEFAULT_PROXY": "http://127.0.0.1:10086",
     "ENABLE_CRAWLER": True,  # 是否启用爬取新闻功能，False时直接停止程序
     "ENABLE_NOTIFICATION": True,  # 是否启用通知功能，False时不发送手机通知
@@ -42,6 +46,10 @@ CONFIG = {
         "HOTNESS_WEIGHT": 0.1,  # 热度
     },
 }
+
+YAML_CONFIG= ConfigManager(
+    (Path(__file__).parent / "config.yaml").resolve()
+).config
 
 
 class TimeHelper:
@@ -2004,10 +2012,10 @@ class ReportGenerator:
         )
         wework_url = os.environ.get("WEWORK_WEBHOOK_URL", CONFIG["WEWORK_WEBHOOK_URL"])
         telegram_token = os.environ.get(
-            "TELEGRAM_BOT_TOKEN", CONFIG["TELEGRAM_BOT_TOKEN"]
+            "TELEGRAM_BOT_TOKEN", YAML_CONFIG.get("telegram", {}).get("token", {})
         )
         telegram_chat_id = os.environ.get(
-            "TELEGRAM_CHAT_ID", CONFIG["TELEGRAM_CHAT_ID"]
+            "TELEGRAM_CHAT_ID", YAML_CONFIG.get("telegram", {}).get("chat_id", {})
         )
 
         update_info_to_send = update_info if CONFIG["SHOW_VERSION_UPDATE"] else None
@@ -2302,7 +2310,9 @@ class NewsAnalyzer:
         self.request_interval = request_interval
         self.report_type = report_type
         self.rank_threshold = rank_threshold
-        self.is_github_actions = os.environ.get("GITHUB_ACTIONS") == "true"
+        self.is_github_actions = (
+            os.environ.get("GITHUB_ACTIONS", CONFIG["GITHUB_ACTIONS"]) == "True"
+        )
         self.update_info = None
         self.proxy_url = None
         if not self.is_github_actions and CONFIG["USE_PROXY"]:
@@ -2446,12 +2456,8 @@ class NewsAnalyzer:
             ("baidu", "百度热搜"),
             ("wallstreetcn-hot", "华尔街见闻"),
             ("thepaper", "澎湃新闻"),
-            ("bilibili-hot-search", "bilibili 热搜"),
             ("cls-hot", "财联社热门"),
-            ("ifeng", "凤凰网"),
             "tieba",
-            "weibo",
-            "douyin",
             "zhihu",
         ]
 
@@ -2542,7 +2548,13 @@ def main():
         report_type=CONFIG["REPORT_TYPE"],
         rank_threshold=CONFIG["RANK_THRESHOLD"],
     )
-    analyzer.run()
+
+    if CONFIG["GITHUB_ACTIONS"] == "True":
+        schedule = Scheduler()
+        schedule.every(1).hour.do(analyzer.run)
+        schedule.run_pending()
+    else:
+        analyzer.run()
 
 
 if __name__ == "__main__":
