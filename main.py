@@ -437,7 +437,7 @@ class DataProcessor:
 
     @staticmethod
     def load_frequency_words(
-        frequency_file: str = "frequency_words.txt",
+        frequency_file: str = "./config/frequency_words.txt",
     ) -> Tuple[List[Dict], List[str]]:
         """加载频率词配置"""
         frequency_path = Path(frequency_file)
