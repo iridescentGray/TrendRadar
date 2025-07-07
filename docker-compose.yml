@@ -1,0 +1,13 @@
+version: "3"
+services:
+  trend_radar:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: python main.py
+    stdin_open: true
+    volumes:
+      - ./output/:/trendradar/output
+    tty: true
+    ipc: host

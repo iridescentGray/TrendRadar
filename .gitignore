@@ -1,0 +1,30 @@
+# Distribution / packaging
+.Python
+./build/*
+dist/
+
+# Environments
+.env
+
+# mkdocs documentation
+/site
+
+.idea
+
+
+.DS_Store
+__pycache__
+
+*.log
+*.parquet
+db
+poetry.lock
+frequency_words.txt
+
+
+state.json
+config.yaml
+uv.lock
+
+/output
+output/
