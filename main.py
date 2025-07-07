@@ -48,9 +48,9 @@ CONFIG = {
 }
 
 YAML_CONFIG= ConfigManager(
-    (Path(__file__).parent / "config.yaml").resolve()
+    (Path(__file__).parent / "config/config.yaml").resolve()
 ).config
-
+print(YAML_CONFIG)
 
 class TimeHelper:
     """时间处理工具"""
@@ -1037,7 +1037,7 @@ class ReportGenerator:
             f.write(html_content)
 
         if is_daily:
-            root_file_path = Path("index.html")
+            root_file_path = Path("./output/index.html")
             with open(root_file_path, "w", encoding="utf-8") as f:
                 f.write(html_content)
 
@@ -2311,7 +2311,7 @@ class NewsAnalyzer:
         self.report_type = report_type
         self.rank_threshold = rank_threshold
         self.is_github_actions = (
-            os.environ.get("GITHUB_ACTIONS", CONFIG["GITHUB_ACTIONS"]) == "True"
+            os.environ.get("GITHUB_ACTIONS",  YAML_CONFIG.get("is_github_actions", "True") ) == "True"
         )
         self.update_info = None
         self.proxy_url = None
@@ -2392,8 +2392,14 @@ class NewsAnalyzer:
                 os.environ.get("DINGTALK_WEBHOOK_URL", CONFIG["DINGTALK_WEBHOOK_URL"]),
                 os.environ.get("WEWORK_WEBHOOK_URL", CONFIG["WEWORK_WEBHOOK_URL"]),
                 (
-                    os.environ.get("TELEGRAM_BOT_TOKEN", CONFIG["TELEGRAM_BOT_TOKEN"])
-                    and os.environ.get("TELEGRAM_CHAT_ID", CONFIG["TELEGRAM_CHAT_ID"])
+                    os.environ.get(
+                        "TELEGRAM_BOT_TOKEN",
+                        os.environ.get(
+                            "TELEGRAM_BOT_TOKEN",
+                            YAML_CONFIG.get("telegram", {}).get("token", {}),
+                        ),
+                    )
+                    and os.environ.get("TELEGRAM_CHAT_ID",YAML_CONFIG.get("telegram", {}).get("chat_id", {}))
                 ),
             ]
         )
@@ -2435,8 +2441,8 @@ class NewsAnalyzer:
                 os.environ.get("DINGTALK_WEBHOOK_URL", CONFIG["DINGTALK_WEBHOOK_URL"]),
                 os.environ.get("WEWORK_WEBHOOK_URL", CONFIG["WEWORK_WEBHOOK_URL"]),
                 (
-                    os.environ.get("TELEGRAM_BOT_TOKEN", CONFIG["TELEGRAM_BOT_TOKEN"])
-                    and os.environ.get("TELEGRAM_CHAT_ID", CONFIG["TELEGRAM_CHAT_ID"])
+                    os.environ.get("TELEGRAM_BOT_TOKEN", YAML_CONFIG.get("telegram", {}).get("token", {}))
+                    and os.environ.get("TELEGRAM_CHAT_ID", YAML_CONFIG.get("telegram", {}).get("chat_id", {}))
                 ),
             ]
         )
@@ -2452,9 +2458,12 @@ class NewsAnalyzer:
         print(f"报告类型: {self.report_type}")
 
         ids = [
-            ("wallstreetcn-hot", "华尔街见闻"),
+            ("wallstreetcn-quick", "华尔街见闻-快讯"),
+            ("wallstreetcn-hot", "华尔街见闻-热文"),
+            ("cls-telegraph", "财联社-快讯"),
+            ("cls-depth", "财联社-深度"),
+            ("jin10", "金10-快讯"),
             ("thepaper", "澎湃新闻"),
-            ("cls-hot", "财联社热门"),
         ]
 
         print(f"开始爬取数据，请求间隔 {self.request_interval} 毫秒")
@@ -2545,10 +2554,13 @@ def main():
         rank_threshold=CONFIG["RANK_THRESHOLD"],
     )
 
-    if CONFIG["GITHUB_ACTIONS"] == "True":
+    if YAML_CONFIG.get("is_github_actions", "True") == "False":
+        analyzer.run()
         schedule = Scheduler()
         schedule.every(1).hour.do(analyzer.run)
-        schedule.run_pending()
+     
+        while True:
+            schedule.run_pending()
     else:
         analyzer.run()
 

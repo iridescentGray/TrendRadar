@@ -9,5 +9,6 @@ services:
     stdin_open: true
     volumes:
       - ./output/:/trendradar/output
+      - ./config/:/trendradar/config
     tty: true
     ipc: host
