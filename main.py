@@ -2560,6 +2560,7 @@ def main():
         schedule.every(1).hour.do(analyzer.run)
      
         while True:
+            time.sleep(1)
             schedule.run_pending()
     else:
         analyzer.run()
