@@ -33,7 +33,6 @@ tests/
 .pytest_cache/
 .venv/
 __pycache__/
-output/
 config/
 uv.lock
 _image/
